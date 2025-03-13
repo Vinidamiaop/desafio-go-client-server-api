@@ -56,7 +56,7 @@ func CotacaoHandler(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		err = json.NewEncoder(w).Encode(cotacao)
+		err = json.NewEncoder(w).Encode(map[string]string{"bid": cotacao.Usdbrl.Bid})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Println(err)
