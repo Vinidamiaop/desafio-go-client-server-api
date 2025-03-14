@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/Vinidamiaop/desafio-go-client-server-api/entities"
+	"github.com/Vinidamiaop/desafio-go-client-server-api/utils"
 	"io"
 	"log"
 	"net/http"
@@ -13,10 +15,6 @@ import (
 
 func main() {
 	getCotacao()
-}
-
-type Cotacao struct {
-	Bid string `json:"bid"`
 }
 
 func getCotacao() {
@@ -41,13 +39,17 @@ func getCotacao() {
 		log.Fatalln(err)
 	}
 
-	var cotacao Cotacao
-	err = json.Unmarshal(body, &cotacao)
+	var response utils.Response[entities.Cotacao]
+	err = json.Unmarshal(body, &response)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	err = SalvaCotacao(cotacao.Bid)
+	if response.IsSuccess == false {
+		log.Fatalln(response.Message)
+	}
+
+	err = SalvaCotacao(response.Data)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -55,13 +57,13 @@ func getCotacao() {
 	fmt.Println("Cotação salva com sucesso")
 }
 
-func SalvaCotacao(cotacao string) error {
+func SalvaCotacao(cotacao entities.Cotacao) error {
 	file, erro := os.Create("cotacao.txt")
 	if erro != nil {
 		return erro
 	}
 
-	_, erro = file.WriteString(fmt.Sprintf("Dólar: %s", cotacao))
+	_, erro = file.WriteString(fmt.Sprintf("Dólar: %s", cotacao.Usdbrl.Bid))
 	if erro != nil {
 		return erro
 	}

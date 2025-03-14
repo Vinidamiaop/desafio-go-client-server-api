@@ -4,7 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"github.com/Vinidamiaop/desafio-go-client-server-api/database"
+	"github.com/Vinidamiaop/desafio-go-client-server-api/entities"
+	"github.com/Vinidamiaop/desafio-go-client-server-api/utils"
 	"io"
 	"log"
 	"net/http"
@@ -22,6 +23,12 @@ func CotacaoHandler(db *sql.DB) http.HandlerFunc {
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://economia.awesomeapi.com.br/json/last/USD-BRL", nil)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			log.Println(err)
+			err = json.NewEncoder(w).Encode(utils.Response[any]{
+				Message:   err.Error(),
+				Data:      nil,
+				IsSuccess: false,
+			})
 			return
 		}
 
@@ -29,6 +36,11 @@ func CotacaoHandler(db *sql.DB) http.HandlerFunc {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Println(err)
+			err = json.NewEncoder(w).Encode(utils.Response[any]{
+				Message:   err.Error(),
+				Data:      nil,
+				IsSuccess: false,
+			})
 			return
 		}
 
@@ -38,14 +50,24 @@ func CotacaoHandler(db *sql.DB) http.HandlerFunc {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Println(err)
+			err = json.NewEncoder(w).Encode(utils.Response[any]{
+				Message:   err.Error(),
+				Data:      nil,
+				IsSuccess: false,
+			})
 			return
 		}
 
-		var cotacao database.Cotacao
+		var cotacao entities.Cotacao
 		err = json.Unmarshal(body, &cotacao)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Println(err)
+			err = json.NewEncoder(w).Encode(utils.Response[any]{
+				Message:   err.Error(),
+				Data:      nil,
+				IsSuccess: false,
+			})
 			return
 		}
 
@@ -53,15 +75,29 @@ func CotacaoHandler(db *sql.DB) http.HandlerFunc {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Println(err)
+			err = json.NewEncoder(w).Encode(utils.Response[any]{
+				Message:   err.Error(),
+				Data:      nil,
+				IsSuccess: false,
+			})
 			return
 		}
 
-		err = json.NewEncoder(w).Encode(map[string]string{"bid": cotacao.Usdbrl.Bid})
+		err = json.NewEncoder(w).Encode(utils.Response[entities.Cotacao]{
+			Message:   "Cotação salva com sucesso",
+			Data:      cotacao,
+			IsSuccess: true,
+		})
+
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Println(err)
+			err = json.NewEncoder(w).Encode(utils.Response[any]{
+				Message:   err.Error(),
+				Data:      nil,
+				IsSuccess: false,
+			})
 			return
 		}
-
 	}
 }
